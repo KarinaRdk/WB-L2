@@ -31,6 +31,10 @@ func main() {
 
 Ответ:
 ```
-...
+.error
+чтобы вывести ок сравнение должно быть с нил, приведённому к типу указателя на кастомную ошибку
+if err !=(*customError)(nil)
 
-```
+Значение интерфейса равно нил, только если и значение и динамический тип равны нил. test() возвращает [nil, *customError], что не равно [nil, nil].
+
+https://yourbasic.org/golang/gotcha-why-nil-error-not-equal-nil/
