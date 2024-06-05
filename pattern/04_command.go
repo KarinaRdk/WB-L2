@@ -59,6 +59,10 @@ package pattern
 
 
 */
+
+import (
+	"fmt"
+)
 // Интерфейс команды
 type Command interface {
 	execute()
