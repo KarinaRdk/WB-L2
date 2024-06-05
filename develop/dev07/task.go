@@ -1,4 +1,3 @@
-package main
 
 /*
 === Or channel ===
@@ -32,7 +31,46 @@ start := time.Now()
 
 fmt.Printf(“fone after %v”, time.Since(start))
 */
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+// or объединяет несколько каналов в один, закрывая результирующий канал при получении данных из любого из входящих каналов.
+func or(channels...<-chan interface{}) <-chan interface{} {
+	res := make(chan interface{})
+	for _, val := range channels {
+		go func(ch <-chan interface{}) {
+			<-ch // Ожидание получения данных из канала.
+			close(res) // Закрытие результирующего канала после получения данных.
+		}(val)
+	}
+	return res
+}
 
 func main() {
+	// Функция sig создает канал, который закрывается через указанный промежуток времени.
+	sig := func(after time.Duration) <-chan interface{} {
+		c := make(chan interface{})
+		go func() {
+			defer close(c) // Закрытие канала после завершения таймаута.
+			time.Sleep(after) // Ожидание указанного времени перед закрытием канала.
+		}()
+		return c
+	}
 
+	start := time.Now() // Запись времени начала выполнения программы.
+
+	// or используется для объединения нескольких сигналов (каналов), каждый из которых закрывается через разное время.
+	<-or(
+		sig(2*time.Hour), // Канал, закрывающийся через 2 часа.
+		sig(5*time.Minute), // Канал, закрывающийся через 5 минут.
+		sig(1*time.Second), // Канал, закрывающийся через 1 секунду.
+		sig(1*time.Hour), // Канал, закрывающийся через 1 час.
+		sig(1*time.Minute), // Канал, закрывающийся через 1 минуту.
+	)
+
+	fmt.Printf("done after %v", time.Since(start)) // Вывод времени, прошедшего с начала выполнения до закрытия всех каналов.
 }
